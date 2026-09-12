@@ -1,11 +1,13 @@
 {
   "name": "drive-navi-dev",
   "build": {
-    "dockerfile": "../Dockerfile",
+    "dockerfile": "../.docker/Dockerfile",
     "context": ".."
   },
-  "workspaceFolder": "/workspace",
+  "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
+  "workspaceMount": "source=${localWorkspaceFolder},target=/workspaces/${localWorkspaceFolderBasename},type=bind,consistency=cached",
   "remoteUser": "node",
+  "updateRemoteUserUID": true,
   "customizations": {
     "vscode": {
       "extensions": [
@@ -37,5 +39,5 @@
       "onAutoForward": "notify"
     }
   },
-  "postCreateCommand": "git config --global --add safe.directory /workspace && node -v && npm -v"
+  "postCreateCommand": "git config --global --add safe.directory /workspaces/${localWorkspaceFolderBasename} && node -v && npm -v"
 }
