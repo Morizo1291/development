@@ -1,0 +1,14 @@
+{
+  "name": "@curve/api",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "node --watch src/server.js",
+    "start": "node src/server.js",
+    "check": "node --check src/server.js"
+  },
+  "dependencies": {
+    "@curve/contracts": "0.1.0"
+  }
+}

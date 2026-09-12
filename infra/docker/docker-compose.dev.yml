@@ -1,16 +1,16 @@
 services:
   app:
     build:
-      context: ..
-      dockerfile: Dockerfile
+      context: ../..
+      dockerfile: infra/docker/Dockerfile
     working_dir: /workspaces/development
     user: "${UID:-1000}:${GID:-1000}"
     volumes:
-      - ..:/workspaces/development
+      - ../..:/workspaces/development
     tty: true
     stdin_open: true
     ports:
       - "3000:3000"
       - "5173:5173"
       - "8080:8080"
-    command: bash
+    command: npm run dev --workspace=@curve/web -- --host 0.0.0.0

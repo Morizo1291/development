@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CURVE | Drive navigator</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Noto+Sans+JP:wght@400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/src/styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <aside class="sidebar">
+        <a class="brand" href="#"><span class="brand-mark">C</span><span>CURVE</span></a>
+        <nav class="primary-nav" aria-label="メインメニュー">
+          <button class="nav-item active"><span class="icon">⌖</span><span>探索</span></button>
+          <button class="nav-item"><span class="icon">⌁</span><span>ルート</span></button>
+          <button class="nav-item"><span class="icon">♡</span><span>保存済み</span></button>
+        </nav>
+        <div class="sidebar-bottom">
+          <button class="nav-item"><span class="icon">⚙</span><span>設定</span></button>
+          <div class="profile"><div class="avatar">S</div><div><strong>佐藤 晴</strong><small>Premium member</small></div><span class="more">•••</span></div>
+        </div>
+      </aside>
+
+      <section class="content-panel">
+        <header class="topbar">
+          <div class="location"><span class="pin">●</span><span>群馬県・みなかみ町</span><span class="chevron">⌄</span></div>
+          <button class="notification" aria-label="通知">♧<i></i></button>
+        </header>
+        <div class="discover">
+          <p class="eyebrow">EXPLORE / 09.12 SAT</p>
+          <h1>今日は、どんな道へ。</h1>
+          <p class="subcopy">走りの気分に合わせて、いい景色と気持ちいいカーブを見つけよう。</p>
+
+          <div class="mode-switch" role="tablist" aria-label="モード">
+            <button class="mode active" data-mode="sport" role="tab" aria-selected="true"><span class="mode-icon">⌇</span><span><b>ワインディング</b><small>道の表情を愉しむ</small></span></button>
+            <button class="mode" data-mode="drive" role="tab" aria-selected="false"><span class="mode-icon">⌁</span><span><b>ドライブ</b><small>景色と寄り道を愉しむ</small></span></button>
+          </div>
+
+          <div class="filter-row">
+            <button class="filter selected" data-filter="all">すべて <span>18</span></button>
+            <button class="filter" data-filter="nearby">近く</button>
+            <button class="filter" data-filter="scenic">景色がいい</button>
+            <button class="filter" data-filter="rest">休憩できる</button>
+            <button class="filter-icon" aria-label="絞り込み">☷</button>
+          </div>
+
+          <div class="section-heading"><h2 id="list-title">いま近くのワインディング</h2><button id="show-map">地図で見る <span>→</span></button></div>
+          <div class="spot-list" id="spot-list"></div>
+        </div>
+      </section>
+
+      <section class="map-panel" aria-label="ルートマップ">
+        <div class="map-toolbar"><button class="map-search">⌕ <span>場所・スポットを検索</span></button><button class="layers" aria-label="地図レイヤー">▱</button></div>
+        <div class="map-art" aria-hidden="true">
+          <div class="terrain terrain-a"></div><div class="terrain terrain-b"></div><div class="terrain terrain-c"></div>
+          <svg viewBox="0 0 900 900" preserveAspectRatio="none" class="roads">
+            <path d="M-60 650 C120 600 82 455 270 480 S360 280 520 355 S630 595 960 460" class="road-major"/>
+            <path d="M-60 650 C120 600 82 455 270 480 S360 280 520 355 S630 595 960 460" class="road-line"/>
+            <path d="M70 -30 C165 160 90 294 290 400 S505 510 480 770 S720 830 960 700" class="road-small"/>
+            <path d="M360 -30 C290 128 460 170 390 270 S555 370 660 248 S738 155 910 175" class="road-small"/>
+            <path d="M80 760 C230 735 318 810 430 710 S680 680 760 820" class="road-small"/>
+            <path d="M520 355 C530 405 585 427 560 467 S477 513 512 555 S620 580 600 640" class="route"/>
+          </svg>
+          <span class="place place-a">谷川岳</span><span class="place place-b">水上</span><span class="place place-c">赤城山</span><span class="place place-d">沼田</span>
+          <div class="map-pin pin-main"><span>⌇</span><b>碓氷峠</b></div><div class="map-pin pin-rest"><span>☕</span></div><div class="map-pin pin-view"><span>◉</span></div><div class="map-pin pin-road"><span>⌇</span></div>
+        </div>
+        <div class="map-controls"><button>＋</button><button>−</button><button class="locate">⊙</button></div>
+        <div class="map-legend"><span><i class="legend-line"></i>おすすめルート</span><span><i class="legend-dot"></i>スポット</span></div>
+        <article class="map-card" id="map-card"><button class="close" aria-label="閉じる">×</button><div class="card-photo photo-usui"><span>群馬</span></div><div class="map-card-info"><p class="eyebrow">FEATURED ROUTE</p><h3>碓氷峠 旧道</h3><p>全長 11.2 km <i></i> 約 22 分</p><button class="route-button">コース詳細 <span>→</span></button></div></article>
+      </section>
+    </main>
+    <section class="route-detail" id="route-detail" aria-hidden="true" aria-labelledby="detail-title">
+      <div class="detail-backdrop"></div>
+      <article class="detail-sheet" role="dialog" aria-modal="true">
+        <button class="detail-close" aria-label="詳細を閉じる">×</button>
+        <p class="eyebrow" id="detail-kind">ROUTE PROFILE</p><h2 id="detail-title">碓氷峠 旧道</h2><p class="detail-area" id="detail-area">群馬県安中市</p>
+        <div class="detail-summary" id="detail-summary"></div><section class="profile-section" id="road-profile"></section><section class="profile-section" id="stops-profile"></section>
+        <p class="detail-note">掲載情報は計画用の目安です。出発前に通行規制・天候・施設営業情報を確認し、法定速度と安全な車間を守って走行してください。</p>
+      </article>
+    </section>
+    <div class="safety"><span>⚑</span><p>安全第一で。交通ルールと現地の規制を守り、無理のない運転を。</p><button aria-label="閉じる">×</button></div>
+    <script type="module" src="/src/main.js"></script>
+    <script type="module" src="/src/wiring.js"></script>
+    <script type="module" src="/src/api-loader.js"></script>
+  </body>
+</html>

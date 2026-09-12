@@ -1,7 +1,7 @@
 {
   "name": "drive-navi-dev",
   "build": {
-    "dockerfile": "../.docker/Dockerfile",
+    "dockerfile": "../infra/docker/Dockerfile",
     "context": ".."
   },
   "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",

@@ -1,0 +1,57 @@
+import { openDetail } from "./detail.js";
+
+const spots = {
+  sport: [
+    { name: '碓氷峠 旧道', area: '群馬県安中市', distance: '18.4 km', time: '約 28 分', badge: 'おすすめ', photo: 'usui', details: ['連続コーナー', '幅員 5.5m', '標高差 420m'] },
+    { name: '榛名山・榛名湖線', area: '群馬県高崎市', distance: '26.7 km', time: '約 39 分', badge: '眺望', photo: 'haruna', details: ['中速コーナー', '幅員 6.0m', '標高差 610m'] },
+    { name: '赤城南面・県道16号', area: '群馬県前橋市', distance: '31.2 km', time: '約 45 分', badge: '朝がおすすめ', photo: 'akagi', details: ['テクニカル', '幅員 5.0m', '標高差 730m'] }
+  ],
+  drive: [
+    { name: '奥利根ゆけむり街道', area: '群馬県みなかみ町', distance: '12.8 km', time: '約 20 分', badge: '紅葉名所', photo: 'okutone', details: ['渓谷ビュー', '道の駅あり', '温泉 3ヶ所'] },
+    { name: '榛名湖パノラマライン', area: '群馬県高崎市', distance: '27.1 km', time: '約 42 分', badge: '湖畔', photo: 'haruna', details: ['湖畔ビュー', 'カフェあり', '展望台 2ヶ所'] },
+    { name: '赤城高原ルート', area: '群馬県沼田市', distance: '34.6 km', time: '約 52 分', badge: '寄り道', photo: 'akagi', details: ['高原ビュー', '牧場あり', '道の駅あり'] }
+  ]
+};
+
+let currentMode = 'sport';
+const spotList = document.querySelector('#spot-list');
+const listTitle = document.querySelector('#list-title');
+
+function renderSpots(filter = 'all') {
+  let activeSpots = spots[currentMode];
+  if (filter === 'nearby') activeSpots = activeSpots.slice(0, 2);
+  if (filter === 'scenic') activeSpots = activeSpots.filter((spot) => spot.badge !== 'おすすめ');
+  if (filter === 'rest') activeSpots = currentMode === 'drive' ? activeSpots : activeSpots.slice(1);
+  spotList.innerHTML = activeSpots.map((spot, index) => `
+    <article class="spot-card ${index === 0 ? 'featured' : ''}" tabindex="0" role="button" data-spot="${spot.name}">
+      <div class="card-photo photo-${spot.photo}"><span>${spot.badge}</span></div>
+      <div class="spot-info"><p class="spot-area">${spot.area}</p><h3>${spot.name}</h3><p class="spot-meta">${spot.distance}<i></i>${spot.time}</p><div class="chips">${spot.details.map(detail => `<span>${detail}</span>`).join('')}</div></div>
+      <button class="save" aria-label="${spot.name}を保存">♡</button>
+    </article>`).join('');
+  document.querySelectorAll('.save').forEach(button => button.addEventListener('click', () => button.classList.toggle('saved')));
+}
+
+document.querySelectorAll('.mode').forEach(button => button.addEventListener('click', () => {
+  currentMode = button.dataset.mode;
+  document.querySelectorAll('.mode').forEach(item => { item.classList.toggle('active', item === button); item.setAttribute('aria-selected', item === button); });
+  listTitle.textContent = currentMode === 'sport' ? 'いま近くのワインディング' : '寄り道したいドライブコース';
+  document.querySelector('.safety p').textContent = currentMode === 'sport' ? '安全第一で。交通ルールと現地の規制を守り、無理のない運転を。' : '景色を楽しむためにも、余裕ある計画とこまめな休憩を。';
+  document.querySelector('.filter.selected').click();
+}));
+
+document.querySelectorAll('.filter').forEach(button => button.addEventListener('click', () => {
+  document.querySelectorAll('.filter').forEach(item => item.classList.toggle('selected', item === button));
+  renderSpots(button.dataset.filter);
+}));
+
+document.querySelector('.safety button').addEventListener('click', () => document.querySelector('.safety').remove());
+renderSpots();
+
+
+document.addEventListener("curve:spots", event => {
+  spots = {
+    sport: event.detail.filter(spot => spot.mode === "sport").map(spot => ({ ...spot, distance: `${spot.distanceKm} km`, time: `約 ${spot.durationMinutes} 分`, details: spot.highlights })),
+    drive: event.detail.filter(spot => spot.mode === "drive").map(spot => ({ ...spot, distance: `${spot.distanceKm} km`, time: `約 ${spot.durationMinutes} 分`, details: spot.highlights }))
+  };
+  document.querySelector(".filter.selected").click();
+});
