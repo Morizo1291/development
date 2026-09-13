@@ -12,6 +12,6 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/* \
     && corepack enable
 
-EXPOSE 3000 5173 8080
+EXPOSE 3000 5173 8080 8787
 
 CMD ["bash"]

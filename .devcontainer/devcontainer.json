@@ -24,7 +24,7 @@
       }
     }
   },
-  "forwardPorts": [3000, 5173, 8080],
+  "forwardPorts": [3000, 5173, 8080, 8787],
   "portsAttributes": {
     "3000": {
       "label": "Frontend App",
@@ -36,6 +36,10 @@
     },
     "8080": {
       "label": "Alternative Web UI",
+      "onAutoForward": "notify"
+    },
+    "8787": {
+      "label": "CURVE API",
       "onAutoForward": "notify"
     }
   },

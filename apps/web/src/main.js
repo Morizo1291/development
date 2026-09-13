@@ -1,6 +1,6 @@
 import { openDetail } from "./detail.js";
 
-const spots = {
+let spots = {
   sport: [
     { name: '碓氷峠 旧道', area: '群馬県安中市', distance: '18.4 km', time: '約 28 分', badge: 'おすすめ', photo: 'usui', details: ['連続コーナー', '幅員 5.5m', '標高差 420m'] },
     { name: '榛名山・榛名湖線', area: '群馬県高崎市', distance: '26.7 km', time: '約 39 分', badge: '眺望', photo: 'haruna', details: ['中速コーナー', '幅員 6.0m', '標高差 610m'] },
@@ -17,18 +17,19 @@ let currentMode = 'sport';
 const spotList = document.querySelector('#spot-list');
 const listTitle = document.querySelector('#list-title');
 
+const escapeHtml = (value) => String(value).replace(/[&<>'"]/g, character => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[character]));
 function renderSpots(filter = 'all') {
   let activeSpots = spots[currentMode];
   if (filter === 'nearby') activeSpots = activeSpots.slice(0, 2);
   if (filter === 'scenic') activeSpots = activeSpots.filter((spot) => spot.badge !== 'おすすめ');
   if (filter === 'rest') activeSpots = currentMode === 'drive' ? activeSpots : activeSpots.slice(1);
   spotList.innerHTML = activeSpots.map((spot, index) => `
-    <article class="spot-card ${index === 0 ? 'featured' : ''}" tabindex="0" role="button" data-spot="${spot.name}">
+    <article class="spot-card ${index === 0 ? 'featured' : ''}" tabindex="0" role="button" data-spot="${escapeHtml(spot.name)}">
       <div class="card-photo photo-${spot.photo}"><span>${spot.badge}</span></div>
-      <div class="spot-info"><p class="spot-area">${spot.area}</p><h3>${spot.name}</h3><p class="spot-meta">${spot.distance}<i></i>${spot.time}</p><div class="chips">${spot.details.map(detail => `<span>${detail}</span>`).join('')}</div></div>
-      <button class="save" aria-label="${spot.name}を保存">♡</button>
+      <div class="spot-info"><p class="spot-area">${escapeHtml(spot.area)}</p><h3>${escapeHtml(spot.name)}</h3><p class="spot-meta">${escapeHtml(spot.distance)}<i></i>${escapeHtml(spot.time)}</p><div class="chips">${spot.details.map(detail => `<span>${escapeHtml(detail)}</span>`).join('')}</div></div>
+      <button class="save" aria-label="${escapeHtml(spot.name)}を保存" aria-pressed="false">♡</button>
     </article>`).join('');
-  document.querySelectorAll('.save').forEach(button => button.addEventListener('click', () => button.classList.toggle('saved')));
+  document.querySelectorAll('.save').forEach(button => button.addEventListener('click', () => { const saved = button.classList.toggle('saved'); button.setAttribute('aria-pressed', String(saved)); button.textContent = saved ? '♥' : '♡'; }));
 }
 
 document.querySelectorAll('.mode').forEach(button => button.addEventListener('click', () => {
@@ -55,3 +56,8 @@ document.addEventListener("curve:spots", event => {
   };
   document.querySelector(".filter.selected").click();
 });
+
+export function findSpot(query) {
+  const normalized = query.trim().toLocaleLowerCase('ja');
+  return Object.values(spots).flat().find(spot => `${spot.name} ${spot.area}`.toLocaleLowerCase('ja').includes(normalized));
+}

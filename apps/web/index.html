@@ -53,7 +53,14 @@
       </section>
 
       <section class="map-panel" aria-label="ルートマップ">
-        <div class="map-toolbar"><button class="map-search">⌕ <span>場所・スポットを検索</span></button><button class="layers" aria-label="地図レイヤー">▱</button></div>
+        <div class="map-toolbar">
+          <form class="map-search" id="destination-form" role="search">
+            <label class="sr-only" for="destination-input">目的地またはスポットを検索</label>
+            <span aria-hidden="true">⌕</span><input id="destination-input" type="search" placeholder="目的地・スポットを検索" autocomplete="off" />
+            <button type="submit">検索</button>
+          </form>
+          <button class="layers" aria-label="地図レイヤー">▱</button>
+        </div>
         <div class="map-art" aria-hidden="true">
           <div class="terrain terrain-a"></div><div class="terrain terrain-b"></div><div class="terrain terrain-c"></div>
           <svg viewBox="0 0 900 900" preserveAspectRatio="none" class="roads">
@@ -69,7 +76,8 @@
         </div>
         <div class="map-controls"><button>＋</button><button>−</button><button class="locate">⊙</button></div>
         <div class="map-legend"><span><i class="legend-line"></i>おすすめルート</span><span><i class="legend-dot"></i>スポット</span></div>
-        <article class="map-card" id="map-card"><button class="close" aria-label="閉じる">×</button><div class="card-photo photo-usui"><span>群馬</span></div><div class="map-card-info"><p class="eyebrow">FEATURED ROUTE</p><h3>碓氷峠 旧道</h3><p>全長 11.2 km <i></i> 約 22 分</p><button class="route-button">コース詳細 <span>→</span></button></div></article>
+        <article class="map-card" id="map-card"><button class="close" aria-label="閉じる">×</button><div class="card-photo photo-usui"><span id="map-card-badge">群馬</span></div><div class="map-card-info"><p class="eyebrow" id="map-card-kind">FEATURED ROUTE</p><h3 id="map-card-title">碓氷峠 旧道</h3><p id="map-card-meta">全長 11.2 km <i></i> 約 22 分</p><button class="route-button" id="map-card-action">コース詳細 <span>→</span></button></div></article>
+        <p class="route-status" id="route-status" role="status" aria-live="polite">目的地を検索して、通常ルートの案内を始められます。</p>
       </section>
     </main>
     <section class="route-detail" id="route-detail" aria-hidden="true" aria-labelledby="detail-title">
