@@ -14,6 +14,9 @@ let spots = {
 };
 
 let currentMode = 'sport';
+// persisted saved spot ids
+const SAVED_KEY = 'curve:saved';
+let savedIds = new Set(JSON.parse(localStorage.getItem(SAVED_KEY) || '[]'));
 const spotList = document.querySelector('#spot-list');
 const listTitle = document.querySelector('#list-title');
 
@@ -27,9 +30,26 @@ function renderSpots(filter = 'all') {
     <article class="spot-card ${index === 0 ? 'featured' : ''}" tabindex="0" role="button" data-spot="${escapeHtml(spot.name)}">
       <div class="card-photo photo-${spot.photo}"><span>${spot.badge}</span></div>
       <div class="spot-info"><p class="spot-area">${escapeHtml(spot.area)}</p><h3>${escapeHtml(spot.name)}</h3><p class="spot-meta">${escapeHtml(spot.distance)}<i></i>${escapeHtml(spot.time)}</p><div class="chips">${spot.details.map(detail => `<span>${escapeHtml(detail)}</span>`).join('')}</div></div>
-      <button class="save" aria-label="${escapeHtml(spot.name)}を保存" aria-pressed="false">♡</button>
+      <button class="save ${savedIds.has(spot.id || spot.name) ? 'saved' : ''}" data-id="${escapeHtml(spot.id || spot.name)}" aria-label="${escapeHtml(spot.name)}を保存" aria-pressed="${savedIds.has(spot.id || spot.name)}">${savedIds.has(spot.id || spot.name) ? '♥' : '♡'}</button>
     </article>`).join('');
-  document.querySelectorAll('.save').forEach(button => button.addEventListener('click', () => { const saved = button.classList.toggle('saved'); button.setAttribute('aria-pressed', String(saved)); button.textContent = saved ? '♥' : '♡'; }));
+  // attach save button handlers that persist to localStorage
+  function attachSaveHandlers() {
+    document.querySelectorAll('.save').forEach(button => {
+      // remove previous handlers by cloning
+      const newButton = button.cloneNode(true);
+      button.parentNode.replaceChild(newButton, button);
+      newButton.addEventListener('click', () => {
+        const id = newButton.dataset.id;
+        const isSaved = newButton.classList.toggle('saved');
+        newButton.setAttribute('aria-pressed', String(isSaved));
+        newButton.textContent = isSaved ? '♥' : '♡';
+        if (isSaved) savedIds.add(id); else savedIds.delete(id);
+        localStorage.setItem(SAVED_KEY, JSON.stringify(Array.from(savedIds)));
+      });
+    });
+  }
+
+  // call after initial render and also when spots update
 }
 
 document.querySelectorAll('.mode').forEach(button => button.addEventListener('click', () => {
@@ -57,6 +77,8 @@ document.addEventListener("curve:spots", event => {
     drive: event.detail.filter(spot => spot.mode === "drive").map(spot => ({ ...spot, distance: `${spot.distanceKm} km`, time: `約 ${spot.durationMinutes} 分`, details: spot.highlights }))
   };
   document.querySelector(".filter.selected").click();
+  // reattach save handlers for newly rendered items
+  attachSaveHandlers();
 });
 
 // UI: show loading and errors from API loader

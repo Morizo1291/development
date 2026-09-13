@@ -1,4 +1,4 @@
-const apiBaseUrl = import.meta.env.VITE_CURVE_API_URL || 'http://localhost:8787';
+export const apiBaseUrl = import.meta.env.VITE_CURVE_API_URL || 'http://localhost:8787';
 
 export async function loadSpots(mode) {
   try {

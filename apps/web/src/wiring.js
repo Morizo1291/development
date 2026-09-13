@@ -1,5 +1,6 @@
 import { openDetail } from './detail.js';
 import { findSpot } from './main.js';
+import { apiBaseUrl } from './api-loader.js';
 
 document.addEventListener('click', event => {
   const card = event.target.closest('.spot-card');
@@ -18,7 +19,24 @@ const mapCard = document.querySelector('#map-card');
 mapCard.querySelector('.close').addEventListener('click', () => mapCard.remove());
 mapCard.querySelector('.route-button').addEventListener('click', () => {
   const name = mapCard.querySelector('h3').textContent;
-  if (mapCard.dataset.navigation === 'true') { document.querySelector('#route-status').textContent = `「${name}」への案内を準備しました。出発前に交通規制と周辺状況をご確認ください。`; return; }
+  if (mapCard.dataset.navigation === 'true') {
+    // attempt to start navigation via API
+    const spot = findSpot(name);
+    if (!spot || !spot.id) {
+      document.querySelector('#route-status').textContent = `「${name}」のスポット情報が見つかりません。`; return;
+    }
+    fetch(`${apiBaseUrl}/api/v1/navigation`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ spotId: spot.id })
+    }).then(res => res.ok ? res.json() : res.json().then(j => Promise.reject(j))).then(payload => {
+      document.querySelector('#route-status').textContent = `「${name}」への案内を開始しました（ETA: ${payload.data.etaMinutes} 分）。`;
+    }).catch(err => {
+      const msg = err && err.error ? err.error : (err && err.message) || '案内の開始に失敗しました';
+      document.querySelector('#route-status').textContent = `案内開始エラー: ${msg}`;
+    });
+    return;
+  }
   openDetail(name);
 });
 document.querySelector('#show-map').addEventListener('click', () => {

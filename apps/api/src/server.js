@@ -7,20 +7,54 @@ const headers = { 'content-type': 'application/json; charset=utf-8', 'access-con
 const send = (response, status, body) => { response.writeHead(status, headers); response.end(JSON.stringify(body)); };
 
 const server = createServer((request, response) => {
+  // Basic CORS preflight support
   if (request.method === 'OPTIONS') return send(response, 204, null);
-  if (request.method !== 'GET') return send(response, 405, { error: 'method_not_allowed' });
   const url = new URL(request.url, `http://${request.headers.host}`);
-  if (url.pathname === '/health') return send(response, 200, { status: 'ok' });
-  if (url.pathname === '/api/v1/spots') {
+
+  // Health check
+  if (request.method === 'GET' && url.pathname === '/health') return send(response, 200, { status: 'ok' });
+
+  // GET /api/v1/spots and GET /api/v1/spots/:id
+  if (request.method === 'GET' && url.pathname === '/api/v1/spots') {
     const mode = url.searchParams.get('mode');
     if (mode && !MODES.includes(mode)) return send(response, 400, { error: 'invalid_mode' });
     return send(response, 200, { data: mode ? spots.filter(spot => spot.mode === mode) : spots });
   }
-  const match = url.pathname.match(/^\/api\/v1\/spots\/([^/]+)$/);
-  if (match) {
-    const spot = spots.find(item => item.id === decodeURIComponent(match[1]));
-    return spot ? send(response, 200, { data: spot }) : send(response, 404, { error: 'spot_not_found' });
+  if (request.method === 'GET') {
+    const match = url.pathname.match(/^\/api\/v1\/spots\/([^/]+)$/);
+    if (match) {
+      const spot = spots.find(item => item.id === decodeURIComponent(match[1]));
+      return spot ? send(response, 200, { data: spot }) : send(response, 404, { error: 'spot_not_found' });
+    }
   }
+
+  // POST /api/v1/navigation - start navigation to a spot
+  if (request.method === 'POST' && url.pathname === '/api/v1/navigation') {
+    let body = '';
+    request.on('data', chunk => { body += chunk; });
+    request.on('end', () => {
+      try {
+        const payload = body ? JSON.parse(body) : {};
+        const spotId = payload.spotId;
+        if (!spotId) return send(response, 400, { error: 'missing_spotId' });
+        const spot = spots.find(s => s.id === spotId);
+        if (!spot) return send(response, 404, { error: 'spot_not_found' });
+        // For now simulate navigation creation and return a lightweight route object
+        const route = {
+          id: `route-to-${spot.id}`,
+          spotId: spot.id,
+          destination: spot.name,
+          etaMinutes: spot.durationMinutes || Math.round((spot.distanceKm || 0) * 2),
+          note: '案内を開始しました。実際のナビ連携はクライアント側で行ってください。'
+        };
+        return send(response, 200, { status: 'navigating', data: route });
+      } catch (err) {
+        return send(response, 400, { error: 'invalid_json' });
+      }
+    });
+    return;
+  }
+
   return send(response, 404, { error: 'not_found' });
 });
 
