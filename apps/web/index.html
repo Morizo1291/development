@@ -49,7 +49,10 @@
 
           <div id="api-status" class="api-status">
             <div id="loader" class="loader" aria-hidden="true"><span class="spinner" aria-hidden="true"></span><span class="loader-text">読み込み中…</span></div>
-            <div id="api-error" class="api-error" role="alert" aria-hidden="true"></div>
+            <div id="api-error" class="api-error" role="alert" aria-hidden="true">
+              <span id="api-error-message"></span>
+              <button id="api-retry" class="api-retry">再試行</button>
+            </div>
           </div>
 
           <div class="section-heading"><h2 id="list-title">いま近くのワインディング</h2><button id="show-map">地図で見る <span>→</span></button></div>

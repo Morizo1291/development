@@ -62,6 +62,8 @@ document.addEventListener("curve:spots", event => {
 // UI: show loading and errors from API loader
 const loaderEl = document.getElementById('loader');
 const apiErrorEl = document.getElementById('api-error');
+const apiErrorMsg = document.getElementById('api-error-message');
+const apiRetryBtn = document.getElementById('api-retry');
 document.addEventListener('curve:spots-loading', () => {
   if (loaderEl) { loaderEl.style.display = 'block'; loaderEl.setAttribute('aria-hidden','false'); }
   if (apiErrorEl) { apiErrorEl.style.display = 'none'; apiErrorEl.setAttribute('aria-hidden','true'); }
@@ -72,8 +74,20 @@ document.addEventListener('curve:spots', () => {
 });
 document.addEventListener('curve:spots-error', e => {
   if (loaderEl) { loaderEl.style.display = 'none'; loaderEl.setAttribute('aria-hidden','true'); }
-  if (apiErrorEl) { apiErrorEl.textContent = e?.detail?.message || 'API に接続できません'; apiErrorEl.style.display = 'block'; apiErrorEl.setAttribute('aria-hidden','false'); }
+  if (apiErrorEl) {
+    if (apiErrorMsg) apiErrorMsg.textContent = e?.detail?.message || 'API に接続できません';
+    apiErrorEl.style.display = 'flex'; apiErrorEl.setAttribute('aria-hidden','false');
+  }
 });
+
+if (apiRetryBtn) {
+  apiRetryBtn.addEventListener('click', () => {
+    // hide error, show loader, and request spots again
+    if (apiErrorEl) { apiErrorEl.style.display = 'none'; apiErrorEl.setAttribute('aria-hidden','true'); }
+    if (loaderEl) { loaderEl.style.display = 'block'; loaderEl.setAttribute('aria-hidden','false'); }
+    document.dispatchEvent(new CustomEvent('curve:request-spots', { detail: { mode: currentMode } }));
+  });
+}
 
 export function findSpot(query) {
   const normalized = query.trim().toLocaleLowerCase('ja');
