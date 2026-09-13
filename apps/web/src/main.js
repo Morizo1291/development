@@ -37,7 +37,9 @@ document.querySelectorAll('.mode').forEach(button => button.addEventListener('cl
   document.querySelectorAll('.mode').forEach(item => { item.classList.toggle('active', item === button); item.setAttribute('aria-selected', item === button); });
   listTitle.textContent = currentMode === 'sport' ? 'いま近くのワインディング' : '寄り道したいドライブコース';
   document.querySelector('.safety p').textContent = currentMode === 'sport' ? '安全第一で。交通ルールと現地の規制を守り、無理のない運転を。' : '景色を楽しむためにも、余裕ある計画とこまめな休憩を。';
-  document.querySelector('.filter.selected').click();
+  // Request mode-specific spots from the API (falls back to bundled data if unavailable)
+  document.dispatchEvent(new CustomEvent('curve:request-spots', { detail: { mode: currentMode } }));
+  // Trigger UI filter refresh once data arrives (curve:spots handler will reapply selected filter)
 }));
 
 document.querySelectorAll('.filter').forEach(button => button.addEventListener('click', () => {
@@ -55,6 +57,22 @@ document.addEventListener("curve:spots", event => {
     drive: event.detail.filter(spot => spot.mode === "drive").map(spot => ({ ...spot, distance: `${spot.distanceKm} km`, time: `約 ${spot.durationMinutes} 分`, details: spot.highlights }))
   };
   document.querySelector(".filter.selected").click();
+});
+
+// UI: show loading and errors from API loader
+const loaderEl = document.getElementById('loader');
+const apiErrorEl = document.getElementById('api-error');
+document.addEventListener('curve:spots-loading', () => {
+  if (loaderEl) { loaderEl.style.display = 'block'; loaderEl.setAttribute('aria-hidden','false'); }
+  if (apiErrorEl) { apiErrorEl.style.display = 'none'; apiErrorEl.setAttribute('aria-hidden','true'); }
+});
+document.addEventListener('curve:spots', () => {
+  if (loaderEl) { loaderEl.style.display = 'none'; loaderEl.setAttribute('aria-hidden','true'); }
+  if (apiErrorEl) { apiErrorEl.style.display = 'none'; apiErrorEl.setAttribute('aria-hidden','true'); }
+});
+document.addEventListener('curve:spots-error', e => {
+  if (loaderEl) { loaderEl.style.display = 'none'; loaderEl.setAttribute('aria-hidden','true'); }
+  if (apiErrorEl) { apiErrorEl.textContent = e?.detail?.message || 'API に接続できません'; apiErrorEl.style.display = 'block'; apiErrorEl.setAttribute('aria-hidden','false'); }
 });
 
 export function findSpot(query) {

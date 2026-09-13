@@ -6,7 +6,7 @@ const port = Number(process.env.PORT || 8787);
 const headers = { 'content-type': 'application/json; charset=utf-8', 'access-control-allow-origin': '*' };
 const send = (response, status, body) => { response.writeHead(status, headers); response.end(JSON.stringify(body)); };
 
-createServer((request, response) => {
+const server = createServer((request, response) => {
   if (request.method === 'OPTIONS') return send(response, 204, null);
   if (request.method !== 'GET') return send(response, 405, { error: 'method_not_allowed' });
   const url = new URL(request.url, `http://${request.headers.host}`);
@@ -22,4 +22,17 @@ createServer((request, response) => {
     return spot ? send(response, 200, { data: spot }) : send(response, 404, { error: 'spot_not_found' });
   }
   return send(response, 404, { error: 'not_found' });
-}).listen(port, () => console.log(`CURVE API listening on http://localhost:${port}`));
+});
+
+server.on('error', error => {
+  if (error.code === 'EADDRINUSE') {
+    console.error(`CURVE API could not start: port ${port} is already in use. Stop the existing API or run PORT=<another-port> npm run dev:api.`);
+    process.exitCode = 1;
+    return;
+  }
+  throw error;
+});
+
+server.listen(port, () => {
+  console.log(`CURVE API listening on http://localhost:${port}`);
+});
